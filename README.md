@@ -1,2 +1,66 @@
-# SC-File-Blender-Addon
-Импорт STALCRAFT:X ассетов в Blender
+﻿# SC-File Blender Addon
+
+`SC-File Blender Addon` - это аддон для Blender, который импортирует ассеты STALCRAFT:X через внутреннюю конвертацию в промежуточные файлы (proxy cache), собран на основе SC-File от onejeuu.
+
+## Что умеет
+
+- Импорт через меню `File -> Import`.
+- Импорт перетаскиванием файлов (Drag and Drop) в Blender.
+- Поддержка форматов:
+  - модели: `.mcsb`, `.mcsa`, `.mcvd`
+  - текстуры: `.ol`
+  - изображения: `.mic`
+  - архивы текстур: `.texarr`
+- Кэширование результатов конвертации для повторного использования.
+- Очистка кэша одной кнопкой (`Clean Proxy Cache`).
+
+## Требования
+
+- Blender `4.0+`.
+- Для готового релизного ZIP из этого репозитория: Windows x64.
+
+## Установка (для пользователя)
+
+1. Скачайте файл аддона `scfile_blender_addon.zip` из релиза.
+2. Откройте Blender: `Edit -> Preferences -> Add-ons -> Install...`.
+3. Выберите ZIP и включите аддон `SC File Importer`.
+4. Откройте настройки аддона и задайте `Proxy Directory` (папка для временных файлов).
+
+## Как пользоваться
+
+1. Импорт через меню:
+   `File -> Import -> SC File Assets (.mcsb/.mcsa/.ol/.mic/.texarr)`.
+2. Или просто перетащите поддерживаемый файл в окно Blender.
+3. Аддон сконвертирует файл и импортирует результат:
+   - модели -> `.glb`
+   - изображения/текстуры -> `.png` или `.dds`
+   - `.texarr` -> распаковка и загрузка найденных изображений
+
+## Настройки аддона
+
+- `Proxy Directory` - каталог кэша конвертации.
+- `Overwrite Converted Files` - перезаписывать уже сконвертированные файлы.
+- `Parse Skeleton` - включать скелет при экспорте моделей.
+- `Parse Animation` - включать встроенные анимации (для GLB).
+- `Keep Proxy Cache` - сохранять кэш для ускорения повторного импорта.
+- `Clean Proxy Cache` - очистить каталог кэша.
+
+## Ограничения
+
+- Материалы в импортированных GLB могут потребовать ручной донастройки в Blender.
+- Если зависимости собраны под другую версию Python/ABI, импорт может не работать (ошибка совместимости окружения Blender).
+
+## Сборка ZIP из исходников
+
+```bash
+python blender_addon/build_addon.py
+```
+
+Готовый архив будет создан в `blender_addon/dist/scfile_blender_addon.zip`.
+
+Если нужен другой Python ABI (под конкретную сборку Blender), используйте:
+
+```bash
+python blender_addon/build_addon.py --target-python 3.12 --target-abi cp312 --target-platform win_amd64
+```
+
