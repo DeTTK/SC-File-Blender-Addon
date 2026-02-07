@@ -19,7 +19,7 @@
 - Blender `4.0+`.
 - Для готового релизного ZIP из этого репозитория: Windows x64.
 
-## Установка (для пользователя)
+## Установка
 
 1. Скачайте файл аддона `scfile_blender_addon.zip` из релиза.
 2. Откройте Blender: `Edit -> Preferences -> Add-ons -> Install...`.
