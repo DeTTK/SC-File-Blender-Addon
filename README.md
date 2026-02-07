@@ -64,3 +64,4 @@ python blender_addon/build_addon.py
 python blender_addon/build_addon.py --target-python 3.12 --target-abi cp312 --target-platform win_amd64
 ```
 
+P.S. Я тут новичОк, пользоваться гит не умею, проект сделан через нейронку, вопросы и притензии принимаются в ТГ @TeamDima
