@@ -53,15 +53,21 @@
 ## Сборка ZIP из исходников
 
 ```bash
-python blender_addon/build_addon.py
+python build_addon.py
 ```
 
-Готовый архив будет создан в `blender_addon/dist/scfile_blender_addon.zip`.
+Готовый архив будет создан в `dist/scfile_blender_addon.zip`.
 
-Если нужен другой Python ABI (под конкретную сборку Blender), используйте:
+Рекомендуется запускать сборку через Python из вашей версии Blender (ABI подхватится автоматически):
 
 ```bash
-python blender_addon/build_addon.py --target-python 3.12 --target-abi cp312 --target-platform win_amd64
+"C:\Program Files\Blender Foundation\Blender 5.1\5.1\python\bin\python.exe" build_addon.py --pip-python "C:\Program Files\Blender Foundation\Blender 5.1\5.1\python\bin\python.exe"
+```
+
+Если нужно вручную переопределить wheel-теги, используйте:
+
+```bash
+python build_addon.py --target-python 3.13 --target-abi cp313 --target-platform win_amd64
 ```
 
 P.S. Я тут новичОк, пользоваться гит не умею, проект сделан через нейронку, вопросы и притензии принимаются в ТГ @TeamDima

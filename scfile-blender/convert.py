@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Iterable
+import sys
 
 from . import cache
 
@@ -44,7 +45,9 @@ def convert_to_proxy(
     except Exception as err:
         raise RuntimeError(
             f"Failed to import bundled package 'scfile' ({err}). "
-            "Most likely Python ABI mismatch in bundled dependencies."
+            "Most likely Python ABI mismatch in bundled dependencies. "
+            f"Current Blender Python: {sys.version_info.major}.{sys.version_info.minor}. "
+            "Rebuild addon with build_addon.py using Blender's own python as --pip-python."
         ) from err
 
     options_key = options_signature(parse_skeleton, parse_animation, overwrite)

@@ -2,16 +2,17 @@ from __future__ import annotations
 
 from pathlib import Path
 import argparse
+import json
 import shutil
 import subprocess
 import sys
 import zipfile
 
 
-ROOT = Path(__file__).resolve().parent.parent
-ADDON_ROOT = ROOT / "blender_addon" / "scfile_blender"
-DIST_DIR = ROOT / "blender_addon" / "dist"
-REQ_FILE = ROOT / "blender_addon" / "requirements-vendor.txt"
+ROOT = Path(__file__).resolve().parent
+ADDON_ROOT = ROOT / "scfile-blender"
+DIST_DIR = ROOT / "dist"
+REQ_FILE = ROOT / "requirements-vendor.txt"
 SOURCE_SCFILE_DIR = ROOT / "scfile"
 SOURCE_SCFILE_EGG = ROOT / "sc_file.egg-info"
 
@@ -35,10 +36,19 @@ def copy_scfile(vendor_dir: Path) -> None:
 def install_vendor_requirements(
     vendor_dir: Path,
     pip_python: str,
-    target_python: str,
-    target_abi: str,
-    target_platform: str,
+    target_python: str | None,
+    target_abi: str | None,
+    target_platform: str | None,
 ) -> None:
+    if target_python is None or target_abi is None or target_platform is None:
+        detected_python, detected_abi, detected_platform = detect_target_tags(pip_python)
+        if target_python is None:
+            target_python = detected_python
+        if target_abi is None:
+            target_abi = detected_abi
+        if target_platform is None:
+            target_platform = detected_platform
+
     cmd = [
         pip_python,
         "-m",
@@ -61,6 +71,19 @@ def install_vendor_requirements(
         str(REQ_FILE),
     ]
     subprocess.run(cmd, check=True)
+
+
+def detect_target_tags(pip_python: str) -> tuple[str, str, str]:
+    script = (
+        "import json, sys, sysconfig;"
+        "platform = sysconfig.get_platform().replace('-', '_').replace('.', '_');"
+        "print(json.dumps({'python': f'{sys.version_info[0]}.{sys.version_info[1]}', "
+        "'abi': f'cp{sys.version_info[0]}{sys.version_info[1]}', "
+        "'platform': platform}))"
+    )
+    out = subprocess.check_output([pip_python, "-c", script], text=True)
+    data = json.loads(out)
+    return data["python"], data["abi"], data["platform"]
 
 
 def build_zip(zip_name: str) -> Path:
@@ -117,22 +140,27 @@ def main() -> None:
     )
     parser.add_argument(
         "--target-python",
-        default="3.11",
-        help="Target Python version for binary wheels, example: 3.11",
+        default=None,
+        help="Target Python version for binary wheels, example: 3.13 (default: detect from --pip-python)",
     )
     parser.add_argument(
         "--target-abi",
-        default="cp311",
-        help="Target CPython ABI tag, example: cp311",
+        default=None,
+        help="Target CPython ABI tag, example: cp313 (default: detect from --pip-python)",
     )
     parser.add_argument(
         "--target-platform",
-        default="win_amd64",
-        help="Target platform tag for wheels, example: win_amd64",
+        default=None,
+        help="Target platform tag for wheels, example: win_amd64 (default: detect from --pip-python)",
     )
     args = parser.parse_args()
 
     vendor_dir = ADDON_ROOT / "vendor"
+    target_python = args.target_python
+    target_abi = args.target_abi
+    target_platform = args.target_platform
+    if target_python is None or target_abi is None or target_platform is None:
+        target_python, target_abi, target_platform = detect_target_tags(args.pip_python)
 
     clean_vendor(vendor_dir)
     copy_scfile(vendor_dir)
@@ -141,9 +169,9 @@ def main() -> None:
         install_vendor_requirements(
             vendor_dir=vendor_dir,
             pip_python=args.pip_python,
-            target_python=args.target_python,
-            target_abi=args.target_abi,
-            target_platform=args.target_platform,
+            target_python=target_python,
+            target_abi=target_abi,
+            target_platform=target_platform,
         )
 
     zip_path = build_zip(args.zip_name)
@@ -153,7 +181,7 @@ def main() -> None:
     print(f"Pip Python: {args.pip_python}")
     print(
         "Wheel target: "
-        f"python={args.target_python}, abi={args.target_abi}, platform={args.target_platform}"
+        f"python={target_python}, abi={target_abi}, platform={target_platform}"
     )
 
 
